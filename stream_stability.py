@@ -40,9 +40,9 @@ def check_stream_stability(cap, MOTION_THRESHOLD=3000):
     # print("check stability time: {} ms".format(int((end-start).microseconds/1000)))
     if motion_pixels > MOTION_THRESHOLD:
         # print("Motion Detected !!!")
-        return False, frame
+        return False, curr_frame
     # print("Stable !!!")
-    return True, frame
+    return True, curr_frame
 
 
 if __name__ == "__main__":

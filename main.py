@@ -10,7 +10,7 @@ import serial # for communication with Arduino
 from stream_stability import check_stream_stability
 
 # declare
-server_url = 'http://172.20.10.3:5000/process_image' 
+server_url = 'http://192.168.0.164:5000/predict' 
 arduino = '/dev/ttyUSB0'
 
 def imageCapture():
@@ -39,7 +39,7 @@ def signal(c):
 
 def httpRequest(frame):
     # send image and request classification result
-    f = cv2.imencode('.jpg', frame) #.tostring() # convert cv2 to jpg
+    _, f = cv2.imencode('.jpg', frame)  # convert cv2 to jpg
     files = {'image': ('filename.jpg', f, 'image/jpeg')}
     start = datetime.datetime.now()
     response = requests.post(server_url, files=files) # request for result
@@ -61,6 +61,8 @@ if __name__ == "__main__":
             result = httpRequest(frame=pic)
         else:
             continue
+
+        print("predict result:",result)
 
         # communicate with Arduino
         if(result == 'L'):
