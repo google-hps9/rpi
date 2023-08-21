@@ -29,21 +29,17 @@ def capture_frames():
 @app.route('/captured_image')
 def getCapturedImage():
     
-    print("aaa")
     # check stability
     
     cam = cv2.VideoCapture(0)
     while frame_lock:
-        print("aaaa")
         ret, frame = cam.read()
         print(ret)
-        cv2.imshow("wqw",frame)
         if ret:
             ret, buffer = cv2.imencode('.jpg', frame)
             if ret:
                 return Response(buffer.tobytes(), mimetype='image/jpeg')
     
-    print("ccc")
     return 'Failed to capture image', 500
 
 
