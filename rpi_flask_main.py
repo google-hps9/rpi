@@ -81,8 +81,9 @@ def signal(c):
     #!/usr/bin/env python3
     ser = serial.Serial(arduino, 9600, timeout=1)
     ser.reset_input_buffer()
+    time.sleep(5)
+    ser.write(c.encode('utf-8'))
     while True:
-        ser.write(c.encode('utf-8'))
         line = ser.readline().decode('utf-8').rstrip()
         if(line == 'F'):
             return True
