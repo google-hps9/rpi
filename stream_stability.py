@@ -10,16 +10,20 @@ buffer = queue.Queue(maxsize=BUFFER_SIZE)
 
 
 def check_stream_stability(cap, MOTION_THRESHOLD=3000):
+    ret, frame = cap.read()
+
+    return True, frame 
+
     start = datetime.datetime.now()
+
 
     global buffer
     while not buffer.full():
         ret, frame = cap.read()
-        frame = cv2.resize(frame,(224,224))
         buffer.put(frame)
 
+
     ret, curr_frame = cap.read()
-    curr_frame = cv2.resize(curr_frame,(224,224))
 
     average_frame = np.mean(list(buffer.queue), axis=0).astype(np.uint8)
 

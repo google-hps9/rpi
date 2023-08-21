@@ -1,33 +1,57 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request,Response, jsonify, render_template
 import numpy as np
 import datetime
 import os
 import cv2
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.imagenet_utils import decode_predictions
-from tensorflow.keras.applications.imagenet_utils import preprocess_input
-from tensorflow.keras.applications import EfficientNetB0
-from tensorflow.keras.models import load_model
+import threading
 import requests # for http request
 import serial # for communication with Arduino
 from stream_stability import check_stream_stability
+import time
 
-# declare
-server_url = 'http://192.168.0.164:5000/predict' 
+# declare 
 arduino = '/dev/ttyUSB0'
 app = Flask(__name__)
 app.debug = True
 
-cam = cv2.VideoCapture(0) # setup cam
+frame_lock = threading.Lock()
+#cam = cv2.VideoCapture(0)
 
-@app.route('/captured_image', methods=['POST'])
+def capture_frames():
+    global cam
+    while True:
+        ret, frame = cam.read()
+        if ret:
+            with frame_lock:
+                current_frame = frame
+        time.sleep(0.1)
+
+@app.route('/captured_image')
 def getCapturedImage():
-    # check stability
-    proceed, pic = imageProcess(cam=cam)
-    if(proceed):
-        result = httpRequest(frame=pic)
     
-    print("predict result:",result)
+    print("aaa")
+    # check stability
+    
+    cam = cv2.VideoCapture(0)
+    while frame_lock:
+        print("aaaa")
+        ret, frame = cam.read()
+        print(ret)
+        cv2.imshow("wqw",frame)
+        if ret:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            if ret:
+                return Response(buffer.tobytes(), mimetype='image/jpeg')
+    
+    print("ccc")
+    return 'Failed to capture image', 500
+
+
+    # proceed, pic = imageProcess(cam=cam)
+    # if(proceed):
+    #     result = httpRequest(frame=pic)
+    
+    # print("predict result:",result)
 
 
 @app.route('/arduino_signal', methods=['POST'])
@@ -77,6 +101,8 @@ def httpRequest(frame):
     end = datetime.datetime.now()
     # print("Response time: {} ms".format(int((end-start).microseconds/1000)))
 
+    
+
     if response.status_code == 200:
         result = response.json()['result']
         return result
@@ -85,7 +111,11 @@ def httpRequest(frame):
     
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    capture_thread = threading.Thread(target=capture_frames)
+    capture_thread.daemon = True
+    capture_thread.start()
+    app.run(host='0.0.0.0',port=5555)
+
     # while(True):
     #     # check stability
     #     proceed, pic = imageProcess(cam=cam)
