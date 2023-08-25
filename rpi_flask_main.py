@@ -45,7 +45,8 @@ def sendArduinoSignal():
     elif(result == 'T'):
         finish = signal('T')
 
-    print("arduino signal has been sent:",result)
+    if finish:
+        print("arduino signal has been sent:",result)
     return jsonify({'done':finish})
 
 
@@ -53,16 +54,19 @@ def sendArduinoSignal():
 def signal(c):
     # send signal to arduino
     #!/usr/bin/env python3
-    ser = serial.Serial(arduino, 9600, timeout=1)
-    ser.reset_input_buffer()
-    time.sleep(5)
-    ser.write(c.encode('utf-8'))
-    while True:
-        line = ser.readline().decode('utf-8').rstrip()
-        if(line == 'F'):
-            return True
-        else: continue
-    
+    try:
+         ser = serial.Serial(arduino, 9600, timeout=1)
+         ser.reset_input_buffer()
+         time.sleep(5)
+         ser.write(c.encode('utf-8'))
+         while True:
+             line = ser.readline().decode('utf-8').rstrip()
+             if(line == 'F'):
+                 return True
+             else: continue
+    except:
+        print("Cannot open serial port")
+        return False
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0',port=5555)
