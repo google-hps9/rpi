@@ -7,9 +7,9 @@ BUFFER_SIZE = 5
 DIFF_THRESHOLD = 30
 
 
-def check_stream_stability(MOTION_THRESHOLD=3000):
+def check_stream_stability(cap, MOTION_THRESHOLD=3000):
    
-    cap = cv2.VideoCapture(0)
+   # cap = cv2.VideoCapture(0)
    # return ret, frame
     start = datetime.datetime.now()
 
