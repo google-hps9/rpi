@@ -14,40 +14,19 @@ arduino = '/dev/ttyUSB0'
 app = Flask(__name__)
 app.debug = True
 
-frame_lock = threading.Lock()
-#cam = cv2.VideoCapture(0)
-
-def capture_frames():
-    global cam
-    while True:
-        ret, frame = cam.read()
-        if ret:
-            with frame_lock:
-                current_frame = frame
-        time.sleep(0.1)
-
 @app.route('/captured_image')
 def getCapturedImage():
     
     # check stability
-    
     cam = cv2.VideoCapture(0)
-    while frame_lock:
-        ret, frame = cam.read()
-        print(ret)
-        if ret:
+    while True:
+        isStable, frame = imageProcess(cam) 
+        if isStable:
             ret, buffer = cv2.imencode('.jpg', frame)
             if ret:
                 return Response(buffer.tobytes(), mimetype='image/jpeg')
     
     return 'Failed to capture image', 500
-
-
-    # proceed, pic = imageProcess(cam=cam)
-    # if(proceed):
-    #     result = httpRequest(frame=pic)
-    
-    # print("predict result:",result)
 
 
 @app.route('/arduino_signal', methods=['POST'])
@@ -61,21 +40,17 @@ def sendArduinoSignal():
         finish = signal('L')
     elif(result == 'R'):
         finish = signal('R')
+    elif(result == 'T')
+        finish == signal('T')
 
     print("arduino signal has been sent:",result)
     return jsonify({'done':finish})
 
-def imageCapture():
-    # image capture
-    ret, frame = cam.read()
-    if(ret):
-        return frame
 
 def imageProcess(cam):
     # image Process
     # if object exists and to be classified, return true
-    isStable, frame = check_stream_stability(cam, MOTION_THRESHOLD=5000)
-    return isStable, frame
+    isStable, frame = check_stream_stability(cam, 5000)
 
 def signal(c):
     # send signal to arduino
@@ -89,45 +64,8 @@ def signal(c):
         if(line == 'F'):
             return True
         else: continue
-
-def httpRequest(frame):
-    # send image and request classification result
-    _, f = cv2.imencode('.jpg', frame)  # convert cv2 to jpg
-    files = {'image': ('filename.jpg', f, 'image/jpeg')}
-    start = datetime.datetime.now()
-    response = requests.post(server_url, files=files) # request for result
-    end = datetime.datetime.now()
-    # print("Response time: {} ms".format(int((end-start).microseconds/1000)))
-
-    
-
-    if response.status_code == 200:
-        result = response.json()['result']
-        return result
-    else:
-        return "NULL"
     
 
 if __name__ == "__main__":
-    capture_thread = threading.Thread(target=capture_frames)
-    capture_thread.daemon = True
-    capture_thread.start()
     app.run(host='0.0.0.0',port=5555)
 
-    # while(True):
-    #     # check stability
-    #     proceed, pic = imageProcess(cam=cam)
-    #     if(proceed):
-    #         result = httpRequest(frame=pic)
-    #     else:
-    #         continue
-
-    #     print("predict result:",result)
-
-    #     # communicate with Arduino
-    #     if(result == 'L'):
-    #         finish = signal('L')
-    #     elif(result == 'R'):
-    #         finish = signal('R')
-    #     else:
-    #         continue

@@ -34,8 +34,8 @@ def check_stream_stability(cap, MOTION_THRESHOLD=3000):
     print("motion pixels:",motion_pixels)
 
 
-    cv2.imshow('Original Frame', curr_frame)
-    cv2.imshow('Tresholded Frame Difference with Buffer', thresholded_frame)
+   # cv2.imshow('Original Frame', curr_frame)
+   # cv2.imshow('Tresholded Frame Difference with Buffer', thresholded_frame)
 
     buffer.get()
     buffer.put(curr_frame)
@@ -51,5 +51,4 @@ def check_stream_stability(cap, MOTION_THRESHOLD=3000):
 
 if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
-    print(type(cap))
     check_stream_stability(cap)
