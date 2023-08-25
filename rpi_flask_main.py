@@ -53,16 +53,17 @@ def getCapturedImage():
 @app.route('/arduino_signal', methods=['POST'])
 def sendArduinoSignal():
     
-    result = request.files['motor'].read()
+    result = request.form.get('text_data')
 
+    finish = False
     # communicate with Arduino
     if(result == 'L'):
         finish = signal('L')
     elif(result == 'R'):
         finish = signal('R')
 
-    print("arduino signal has been sent:",finish)
-
+    print("arduino signal has been sent:",result)
+    return jsonify({'done':finish})
 
 def imageCapture():
     # image capture
