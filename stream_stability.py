@@ -6,18 +6,15 @@ import datetime
 BUFFER_SIZE = 5
 DIFF_THRESHOLD = 30
 
-buffer = queue.Queue(maxsize=BUFFER_SIZE)
 
-
-def check_stream_stability(cap, MOTION_THRESHOLD=3000):
-    ret, frame = cap.read()
-
-    return True, frame 
-
+def check_stream_stability(MOTION_THRESHOLD=3000):
+   
+    cap = cv2.VideoCapture(0)
+   # return ret, frame
     start = datetime.datetime.now()
 
 
-    global buffer
+    buffer = queue.Queue(maxsize=BUFFER_SIZE)
     while not buffer.full():
         ret, frame = cap.read()
         buffer.put(frame)
@@ -44,11 +41,12 @@ def check_stream_stability(cap, MOTION_THRESHOLD=3000):
     # print("check stability time: {} ms".format(int((end-start).microseconds/1000)))
     if motion_pixels > MOTION_THRESHOLD:
         # print("Motion Detected !!!")
-        return False, curr_frame
+        return False
     # print("Stable !!!")
-    return True, curr_frame
+    return True
 
 
 if __name__ == "__main__":
-    cap = cv2.VideoCapture(0)
-    check_stream_stability(cap)
+    stable  = check_stream_stability()
+    print(stable)
+    cv2.waitKey(0)

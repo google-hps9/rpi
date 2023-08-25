@@ -20,7 +20,7 @@ def getCapturedImage():
     # check stability
     cam = cv2.VideoCapture(0)
     while True:
-        isStable, frame = imageProcess(cam) 
+        isStable, frame = imageProcess() 
         if isStable:
             ret, buffer = cv2.imencode('.jpg', frame)
             if ret:
@@ -40,17 +40,17 @@ def sendArduinoSignal():
         finish = signal('L')
     elif(result == 'R'):
         finish = signal('R')
-    elif(result == 'T')
+    elif(result == 'T'):
         finish == signal('T')
 
     print("arduino signal has been sent:",result)
     return jsonify({'done':finish})
 
 
-def imageProcess(cam):
+def imageProcess():
     # image Process
     # if object exists and to be classified, return true
-    isStable, frame = check_stream_stability(cam, 5000)
+    isStable, frame = check_stream_stability(5000)
 
 def signal(c):
     # send signal to arduino
